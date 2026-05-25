@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ybil · Mentor Matching Report · Inovexus</title>
+<style>
+  :root {
+    --bg: #0F1117; --surface: #161B2A; --surface2: #1E2539; --border: rgba(255,255,255,0.08);
+    --text: #E8EAF0; --muted: rgba(232,234,240,0.55); --faint: rgba(232,234,240,0.28);
+    --orange: #E8732A; --orange-d: rgba(232,115,42,0.15); --orange-b: rgba(232,115,42,0.35);
+    --blue: #3B82F6; --blue-d: rgba(59,130,246,0.12); --blue-b: rgba(59,130,246,0.35);
+    --green: #22C55E; --purple: #A855F7; --teal: #14B8A6; --yellow: #EAB308;
+    --red: #EF4444; --indigo: #6366F1; --rose: #F43F5E; --cyan: #06B6D4;
+    --radius: 12px; --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI',system-ui,sans-serif; font-size: 14px; line-height: 1.6; }
+
+  /* NAV */
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(15,17,23,0.96); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 4px; padding: 0 24px; height: 52px; }
+  .nav-logo { font-size: 13px; font-weight: 700; letter-spacing: 3px; color: var(--orange); margin-right: 20px; }
+  .nav-link { font-size: 12px; font-weight: 500; color: var(--muted); text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: all .2s; white-space: nowrap; }
+  .nav-link:hover, .nav-link.active { background: var(--surface2); color: var(--text); }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, #0F1117 0%, #161B2A 50%, #1a1730 100%); border-bottom: 1px solid var(--border); padding: 56px 40px 40px; }
+  .hero-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 3px; color: var(--orange); text-transform: uppercase; margin-bottom: 12px; }
+  .hero-title { font-size: 42px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; }
+  .hero-title span { color: var(--orange); }
+  .hero-sub { font-size: 16px; color: var(--muted); margin-bottom: 32px; max-width: 600px; }
+  .kpi-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
+  .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 20px; min-width: 130px; }
+  .kpi-value { font-size: 28px; font-weight: 800; line-height: 1; }
+  .kpi-value.orange { color: var(--orange); }
+  .kpi-value.blue { color: var(--blue); }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.purple { color: var(--purple); }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .8px; }
+  .confidence-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 20px; display: flex; align-items: center; gap: 16px; max-width: 480px; }
+  .conf-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .conf-track { flex: 1; height: 8px; background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; }
+  .conf-fill { height: 100%; width: 76%; background: linear-gradient(90deg, var(--orange), var(--yellow)); border-radius: 4px; }
+  .conf-score { font-size: 20px; font-weight: 800; color: var(--orange); white-space: nowrap; }
+
+  /* MAIN */
+  main { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+  section { padding-top: 56px; margin-bottom: 8px; }
+  .section-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 28px; }
+  .section-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .icon-orange { background: var(--orange-d); border: 1px solid var(--orange-b); }
+  .icon-blue { background: var(--blue-d); border: 1px solid var(--blue-b); }
+  .icon-teal { background: rgba(20,184,166,0.12); border: 1px solid rgba(20,184,166,0.3); }
+  .icon-purple { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.3); }
+  .icon-green { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); }
+  .section-title { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+  .section-subtitle { font-size: 13px; color: var(--muted); }
+
+  /* PROFILE */
+  .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  @media(max-width:700px){ .profile-grid { grid-template-columns: 1fr; } }
+  .profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .profile-card h3 { font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange); margin-bottom: 14px; }
+  .profile-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .profile-row:last-child { border-bottom: none; }
+  .profile-row .val { color: var(--text); font-weight: 600; text-align: right; max-width: 60%; }
+  .profile-row .key { color: var(--muted); }
+  .bottleneck-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .bottleneck-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; }
+  .bottleneck-list li::before { content: "▶"; color: var(--orange); font-size: 10px; margin-top: 4px; flex-shrink: 0; }
+
+  /* MENTORING AREAS */
+  .mentoring-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 12px; display: flex; gap: 20px; }
+  .mentoring-area-badge { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: 6px; padding: 4px 10px; white-space: nowrap; height: fit-content; margin-top: 2px; }
+  .badge-a1 { background: var(--orange-d); color: var(--orange); border: 1px solid var(--orange-b); }
+  .badge-a2 { background: var(--blue-d); color: var(--blue); border: 1px solid var(--blue-b); }
+  .badge-a3 { background: rgba(168,85,247,0.12); color: var(--purple); border: 1px solid rgba(168,85,247,0.3); }
+  .mentoring-obj { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .mentoring-kpi { font-size: 12px; color: var(--muted); margin-bottom: 10px; display: flex; gap: 8px; align-items: flex-start; }
+  .kpi-pill { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.3); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; letter-spacing: .5px; white-space: nowrap; margin-top: 1px; }
+  .mentoring-rationale { font-size: 13px; color: var(--muted); line-height: 1.65; }
+  .transcript-quote { display: block; background: rgba(232,115,42,0.07); border-left: 3px solid var(--orange); padding: 8px 12px; margin: 10px 0; border-radius: 0 6px 6px 0; font-style: italic; color: rgba(232,234,240,0.8); font-size: 12.5px; line-height: 1.5; }
+  .transcript-source { font-size: 11px; color: var(--orange); font-style: normal; font-weight: 600; margin-top: 4px; display: block; }
+
+  /* MENTOR CARDS */
+  .mentor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media(max-width:800px){ .mentor-grid { grid-template-columns: 1fr; } }
+  .mentor-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; gap: 10px; transition: border-color .2s; }
+  .mentor-card:hover { border-color: rgba(255,255,255,0.18); }
+  .tier-top { border-left: 3px solid var(--orange); }
+  .tier-qualified { border-left: 3px solid var(--blue); }
+  .mentor-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .mentor-name { font-size: 15px; font-weight: 700; }
+  .mentor-location { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .score-badge { width: 46px; height: 46px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; flex-shrink: 0; }
+  .score-top { background: var(--orange-d); border: 2px solid var(--orange); color: var(--orange); }
+  .score-qualified { background: var(--blue-d); border: 2px solid var(--blue); color: var(--blue); }
+  .area-tag { font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; width: fit-content; }
+  .tag-a1 { background: var(--orange-d); color: var(--orange); border: 1px solid var(--orange-b); }
+  .tag-a2 { background: var(--blue-d); color: var(--blue); border: 1px solid var(--blue-b); }
+  .tag-a3 { background: rgba(168,85,247,0.12); color: var(--purple); border: 1px solid rgba(168,85,247,0.3); }
+  .mentor-rationale { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+  .notes-signal { display: block; background: rgba(34,197,94,0.07); border-left: 3px solid var(--green); padding: 6px 10px; margin-top: 4px; border-radius: 0 4px 4px 0; font-size: 11.5px; color: rgba(232,234,240,0.75); font-style: italic; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .skill-tag { font-size: 11px; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; color: var(--faint); }
+
+  /* DASHBOARD */
+  .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:700px){ .dashboard-grid { grid-template-columns: 1fr; } }
+  .chart-wide { grid-column: 1 / -1; }
+  .chart-full { grid-column: 1 / -1; }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .chart-title { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .chart-subtitle { font-size: 11px; color: var(--muted); margin-bottom: 16px; }
+
+  /* FOOTER */
+  footer { background: var(--surface); border-top: 1px solid var(--border); padding: 32px 40px; margin-top: 60px; text-align: center; }
+  .footer-logo { font-size: 13px; font-weight: 700; letter-spacing: 3px; color: var(--orange); margin-bottom: 8px; }
+  .footer-text { font-size: 12px; color: var(--muted); margin: 4px 0; }
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">INOVEXUS</div>
+  <a class="nav-link active" href="#profile">Startup</a>
+  <a class="nav-link" href="#areas">Areas</a>
+  <a class="nav-link" href="#top-mentors">Top Mentors</a>
+  <a class="nav-link" href="#qualified-mentors">Qualified</a>
+  <a class="nav-link" href="#dashboard">Dashboard</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">Mentor Matching Report · May 2026</div>
+  <div class="hero-title">Ybil <span>·</span> Logistics Compliance SaaS</div>
+  <div class="hero-sub">eCMR / eFTI compliance platform with embedded TMS and per-shipment insurance · Tallinn, Estonia · €1M Seed · 505 mentors evaluated</div>
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-value orange">39</div><div class="kpi-label">Total Matched</div></div>
+    <div class="kpi-card"><div class="kpi-value orange">15</div><div class="kpi-label">Top (≥8.5)</div></div>
+    <div class="kpi-card"><div class="kpi-value blue">24</div><div class="kpi-label">Qualified (7–8.4)</div></div>
+    <div class="kpi-card"><div class="kpi-value green">7.7%</div><div class="kpi-label">Match Rate</div></div>
+    <div class="kpi-card"><div class="kpi-value purple">3</div><div class="kpi-label">Mentoring Areas</div></div>
+  </div>
+  <div class="confidence-bar">
+    <div class="conf-label">Global Confidence Score</div>
+    <div class="conf-track"><div class="conf-fill"></div></div>
+    <div class="conf-score">7.7 / 10</div>
+  </div>
+</div>
+
+<main>
+
+<!-- ===== STARTUP PROFILE ===== -->
+<section id="profile">
+  <div class="section-header">
+    <div class="section-icon icon-orange">🚀</div>
+    <div><div class="section-title">Startup Profile — Ybil</div><div class="section-subtitle">Investment memo + sourcing transcripts · May 2026</div></div>
+  </div>
+  <div class="profile-grid">
+    <div class="profile-card">
+      <h3>Company Overview</h3>
+      <div class="profile-row"><span class="key">Sector</span><span class="val">Logistics Tech / B2B SaaS / InsurTech</span></div>
+      <div class="profile-row"><span class="key">HQ</span><span class="val">Tallinn, Estonia</span></div>
+      <div class="profile-row"><span class="key">Stage</span><span class="val">€1M Seed — Convertible Note</span></div>
+      <div class="profile-row"><span class="key">Cap / Discount</span><span class="val">€6M cap · 20% discount</span></div>
+      <div class="profile-row"><span class="key">Round Progress</span><span class="val">60% closed</span></div>
+      <div class="profile-row"><span class="key">ARR (Run Rate)</span><span class="val">€292K (85%+ gross margin)</span></div>
+      <div class="profile-row"><span class="key">Year-1 Cash Revenue</span><span class="val">€621K · EBITDA +€81K</span></div>
+      <div class="profile-row"><span class="key">Customers</span><span class="val">110 paying accounts</span></div>
+    </div>
+    <div class="profile-card">
+      <h3>Product Stack</h3>
+      <div class="profile-row"><span class="key">Layer 1 (Live)</span><span class="val">eCMR / eFTI Compliance</span></div>
+      <div class="profile-row"><span class="key">Layer 2 (MVP Q1 2026)</span><span class="val">AI Transport Management System</span></div>
+      <div class="profile-row"><span class="key">Layer 3 (MVP Q3 2026)</span><span class="val">Embedded Per-Shipment Insurance</span></div>
+      <div class="profile-row"><span class="key">Insurance Partners</span><span class="val">Elama (underwriter) · Howden (reinsurance)</span></div>
+      <div class="profile-row"><span class="key">Key Integrator</span><span class="val">1 FM platform · 15 EU countries · 20K customers</span></div>
+      <div class="profile-row"><span class="key">eFTI Mandate</span><span class="val">EU forced adoption — Jul 2027</span></div>
+      <div class="profile-row"><span class="key">Geo Expansion</span><span class="val">Baltics/PL 2026 → DACH/Benelux 2027 → EU 2028</span></div>
+      <div class="profile-row"><span class="key">ARR Target 2031</span><span class="val">€70M (insurance layer primary driver)</span></div>
+    </div>
+    <div class="profile-card" style="grid-column:1/-1;">
+      <h3>Team</h3>
+      <div class="profile-row"><span class="key">Kalev Reiljan (CEO)</span><span class="val">Nokia → Telia → €80M → €1B+ scaling</span></div>
+      <div class="profile-row"><span class="key">Oliver Tatar (Chairman)</span><span class="val">27yr freight forwarding, founded company in '92</span></div>
+      <div class="profile-row"><span class="key">Antoon Van Rens (COO)</span><span class="val">25yr international road transport (EST, DE, NL, PL)</span></div>
+      <div class="profile-row"><span class="key">Kristjan Toop (CPO)</span><span class="val">Product architecture & compliance platform</span></div>
+      <div class="profile-row"><span class="key">Marti Lung (CTO)</span><span class="val">eFTI/eCMR technical build</span></div>
+    </div>
+  </div>
+  <div class="profile-card">
+    <h3>Strategic Bottlenecks · Derived from Deal Memo + Investor Transcripts</h3>
+    <ul class="bottleneck-list">
+      <li>No channel partner pipeline in DACH or Benelux despite existing integrator model — 1 integrator signed, 0 second ones</li>
+      <li>100% founder-led sales, zero marketing spend — PMF proven but GTM machine not built; 2 sales hires planned (PL + DACH)</li>
+      <li>SaaS B2B methodology learning curve — Antoon (COO) explicitly confirmed "steep learning curve" in sourcing call</li>
+      <li>Insurance product pre-commercial — Elama/Howden structure in place but per-shipment pricing model, actuarial validation, and sales motion not yet designed</li>
+      <li>Baltic-only footprint — expansion into Baltics → Poland corridor blocked without local operator introductions</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== MENTORING AREAS ===== -->
+<section id="areas">
+  <div class="section-header">
+    <div class="section-icon icon-teal">🎯</div>
+    <div><div class="section-title">Mentoring Areas & KPIs</div><div class="section-subtitle">3 structured areas directly linked to Ybil's bottlenecks · Each grounded in verbatim founder statements</div></div>
+  </div>
+
+  <div class="mentoring-row">
+    <span class="mentoring-area-badge badge-a1">Area 1 · Channel Partnerships</span>
+    <div class="mentoring-content">
+      <div class="mentoring-obj">Build EU Channel Partner Network in DACH, Benelux, and Poland</div>
+      <div class="mentoring-kpi"><span class="kpi-pill">KPI</span> Sign 3+ qualified channel partner agreements in DACH/Benelux/Poland covering ≥5,000 potential carrier accounts by Q4 2026</div>
+      <div class="mentoring-rationale">
+        This need was named explicitly by Kalev as his single most valuable mentoring ask. During the investor call with Jens Quadbeck (Inovexus, May 4, 2026), he stated:
+        <span class="transcript-quote">
+          "if you have people who have direct connections to, let's say, big logistics companies, in Germany, in France, in other big European countries. I mean, that's that's that's really valuable for us — and we are obviously also willing to share in that case without any questions."
+          <span class="transcript-source">— Kalev Reiljan (CEO), Ybil Kalev × Inovexus Jens call, May 4, 2026</span>
+        </span>
+        Ybil's GTM operates through a tier-2 channel strategy: fleet-management platforms, TMS providers, and logistics integrators act as distribution amplifiers for the eCMR/eFTI product. One integrator is live across 15 EU countries (20K customers), but the DACH and Benelux pipeline is empty. With the eFTI forced-adoption window closing in July 2027, every quarter without a new signed integrator is irreversible runway lost.
+      </div>
+    </div>
+  </div>
+
+  <div class="mentoring-row">
+    <span class="mentoring-area-badge badge-a2">Area 2 · Direct B2B Sales</span>
+    <div class="mentoring-content">
+      <div class="mentoring-obj">Build Scalable Outbound Sales Engine Targeting SME Logistics Carriers</div>
+      <div class="mentoring-kpi"><span class="kpi-pill">KPI</span> Scale from 110 to 300+ paying accounts by December 2026, reaching €490K ARR run-rate (eCMR + TMS SaaS)</div>
+      <div class="mentoring-rationale">
+        The SaaS B2B methodology gap was identified directly by Antoon Van Rens (COO) in his sourcing call with Annika Jiyeun Kim (Inovexus, March 26, 2026):
+        <span class="transcript-quote">
+          "I'm personally, I'm from logistics transportation background. And these dinosaurs and this paper industry. So for me, I'm in a very speedy learning curve at this moment."
+          <span class="transcript-source">— Antoon Van Rens (COO), Ybil.io × Inovexus Annika Meeting 2, Mar 26, 2026</span>
+        </span>
+        100% of Ybil's current 110 accounts were acquired through founder-led outreach with zero marketing spend — an extraordinary PMF signal, but also a concentration risk. Two senior SaaS sales reps are funded by the raise (Poland + DACH). Mentors with enterprise B2B logistics sales expertise and experience building repeatable outbound motions will directly accelerate the ramp-up of these first hires and compress time-to-revenue.
+      </div>
+    </div>
+  </div>
+
+  <div class="mentoring-row">
+    <span class="mentoring-area-badge badge-a3">Area 3 · InsurTech Commercialization</span>
+    <div class="mentoring-content">
+      <div class="mentoring-obj">Commercialize Embedded Per-Shipment Logistics Insurance with Elama / Howden</div>
+      <div class="mentoring-kpi"><span class="kpi-pill">KPI</span> Launch insurance product commercially with 100+ active policies and positive combined ratio by Q3 2026</div>
+      <div class="mentoring-rationale">
+        Kalev named InsurTech validation explicitly as the second key mentoring need — alongside the logistics operator network — in the same May 4 call:
+        <span class="transcript-quote">
+          "We we are in between different industries. Between logistics and insurance. Which means, I mean, partly fintech as well. And, obviously, we we have things to validate. Because the team is very experienced — but we are all coachable people, and we all take advice gladly. Getting outside opinions and validating our business cases and approach, it's always very valuable."
+          <span class="transcript-source">— Kalev Reiljan (CEO), Ybil Kalev × Inovexus Jens call, May 4, 2026</span>
+        </span>
+        Insurance is Ybil's highest-potential revenue layer: €70M ARR 2031 target, 10× projected conversion vs traditional distribution. Elama underwrites risk; Howden provides reinsurance access and EU regulatory umbrella. The product is pre-commercial and requires InsurTech expertise to structure per-shipment pricing models, validate actuarial assumptions using eCMR transaction data, and design the embedded sales motion.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TOP MENTORS ===== -->
+<section id="top-mentors">
+  <div class="section-header">
+    <div class="section-icon icon-orange">⭐</div>
+    <div><div class="section-title">Top Mentors <span style="color:var(--orange)">DMF ≥ 8.5</span></div><div class="section-subtitle">15 mentors · Re-scored after full notes analysis of the 206K-line Inovexus mentor notes CSV · Prioritising actual logistics operators and proven InsurTech expertise</div></div>
+  </div>
+  <div class="mentor-grid">
+
+    <!-- 1 -->
+    <div class="mentor-card tier-top">
+      <div class="mentor-header"><div><div class="mentor-name">Nicola Verzura</div><div class="mentor-location">📍 Italy</div></div><div class="score-badge score-top">9.3</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">The strongest real-logistics profile in the entire database. Notes confirm: <strong>"Senior CFO &amp; Finance Expert in Logistics &amp; Freight Forwarding | Advisor to CEOs and CFOs on M&amp;A and Group Restructuring"</strong>. Prior roles at <strong>DHL</strong> and <strong>Maersk</strong> (M&amp;A strategy). Has invested in 8 logistics-adjacent startups. Deeply understands freight forwarding economics — the exact customer Ybil serves. TypeForm confirms Supply Chain + Logistics as primary verticals.
+        <span class="notes-signal">📋 Inovexus notes (Oct 2024): "Corporate in logistics – DHL · Maersk – Giant Shipping container, M&A strategy · Knowledge and experience people, fundraising · 8 startups → 1 first Serie A"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">DHL · Maersk Operator</span><span class="skill-tag">Freight Forwarding CFO</span><span class="skill-tag">M&A Logistics</span><span class="skill-tag">SME Startups</span></div>
+    </div>
+
+    <!-- 2 -->
+    <div class="mentor-card tier-top">
+      <div class="mentor-header"><div><div class="mentor-name">Roland Flouquet-Vilboux</div><div class="mentor-location">📍 Paris, France</div></div><div class="score-badge score-top">9.2</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">The only mentor in the Inovexus database with an explicitly curated <strong>"IndustryTech; LogTech"</strong> vertical tag. Active GTM workshop facilitator within the Inovexus programme — notes confirm he ran a multi-startup GTM strategy session (Oct 14, 2025) and is currently mentoring 5 startups on B2B Tech GTM. Coordinates all stakeholders across supply chains and manages international go-to-market. Directly relevant to Ybil's channel partner strategy architecture.
+        <span class="notes-signal">📋 Inovexus notes (Oct 2024): "Accompagne 5 startup sur GTM · Problématique B2B Tech · Interessé sur la partie Fond"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">LogTech Vertical</span><span class="skill-tag">Supply Chain GTM</span><span class="skill-tag">Enterprise B2B</span><span class="skill-tag">Partnership Dev</span><span class="skill-tag">Active Workshop Leader</span></div>
+    </div>
+
+    <!-- 3 -->
+    <div class="mentor-card tier-top">
+      <div class="mentor-header"><div><div class="mentor-name">Vito Lattanzi</div><div class="mentor-location">📍 Italy</div></div><div class="score-badge score-top">9.0</div></div>
+      <div class="area-tag tag-a2">Area 2 · Direct B2B Sales</div>
+      <div class="mentor-rationale"><strong>10+ years at DHL in Milan</strong> as COO-Advisor. Inovexus notes explicitly flag him as: "Investment Support in Logistics &amp; Supply chain · Works with SME as well as consultant · Helps on GTM · Growth Startups to become real company · Real Mentor · Invested in several startups." This is the exact profile Antoon needs as COO in his SaaS learning curve — a logistics operator who has become a hands-on SME growth advisor.
+        <span class="notes-signal">📋 Inovexus notes (May 2025): "COO-Advisor PMI &amp; Startup · Investment Support in Logistics &amp; Supply chain · Works with SME · 10y+ at DHL in Milan · Real Mentor · Helps on Fundraising"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">DHL 10yr Operator</span><span class="skill-tag">Logistics SME Expert</span><span class="skill-tag">COO Advisory</span><span class="skill-tag">GTM</span><span class="skill-tag">Real Mentor</span></div>
+    </div>
+
+    <!-- 4 -->
+    <div class="mentor-card tier-top">
+      <div class="mentor-header"><div><div class="mentor-name">Stéphane Boivin</div><div class="mentor-location">📍 Hong Kong (EU network)</div></div><div class="score-badge score-top">8.9</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">Exited entrepreneur — Co-Founder &amp; CEO of <strong>Pivot88</strong>, a supply chain quality/compliance digitalization platform (120 employees, €18M revenue, acquired by TradeBeyond / EQT-backed, 3× return). Notes confirm his verticals include: "Supply Chain &amp; Logistics, Carrefour network." This is a near-identical profile to Ybil: compliance digitalization for supply chains, built to exit. His EU network (Carrefour, Auchan, Under Armour) gives direct access to large logistics operators.
+        <span class="notes-signal">📋 Inovexus notes (Nov 2025): "Exited entrepreneur — Pivot88 quality &amp; compliance platform enabling 360° supply chain transparency · Acquired by TradeBeyond, EQT-backed · Built to 120 employees · Carrefour network"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Supply Chain Compliance Exit</span><span class="skill-tag">EQT Network</span><span class="skill-tag">Carrefour/Auchan Contacts</span><span class="skill-tag">Onboarded Lead Mentor</span></div>
+    </div>
+
+    <!-- 5 -->
+    <div class="mentor-card tier-top">
+      <div class="mentor-header"><div><div class="mentor-name">Giovanni Meggiorini</div><div class="mentor-location">📍 Italy / Geneva (Jul 2026)</div></div><div class="score-badge score-top">8.8</div></div>
+      <div class="area-tag tag-a2">Area 2 · Direct B2B Sales</div>
+      <div class="mentor-rationale"><strong>10 years at Amazon</strong>, started in Luxembourg in supply chain finance before moving to Global GTM &amp; Growth. Notes confirm: "Finance: Cost optimization modeling, financial analysis for logistics and supply chain infrastructure · LogTech expertise &amp; Cost optimization." Moving to Geneva in July 2026 — ideal timing for active mentoring engagement on Ybil's DACH/Swiss corridor.
+        <span class="notes-signal">📋 Inovexus notes (Apr 2026): "10 years at Amazon. Senior Manager, Global GTM &amp; Growth | Amazon Advertising · Started in Finance in Lux. (Supply chain operation) · LogTech expertise &amp; Cost optimization"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Amazon 10yr Supply Chain</span><span class="skill-tag">LogTech Cost Optimization</span><span class="skill-tag">GTM B2B</span><span class="skill-tag">SME Marketing</span><span class="skill-tag">Geneva-based 2026</span></div>
+    </div>
+
+    <!-- 6 -->
+    <div class="mentor-card tier-top">
+      <div class="mentor-header"><div><div class="mentor-name">Christian Laferrère</div><div class="mentor-location">📍 Paris, France</div></div><div class="score-badge score-top">8.8</div></div>
+      <div class="area-tag tag-a3">Area 3 · InsurTech Commercialization</div>
+      <div class="mentor-rationale">Inovexus notes (Apr 2025) explicitly confirm: <strong>"Il a lancé l'assurance sur Backmarket"</strong> — he designed and launched the insurance product at BackMarket (5 years there). This is direct, hands-on embedded insurance commercialization experience — precisely what Ybil needs for its per-shipment insurance layer. His background in the "second life" / circular economy also signals deep expertise in B2C-adjacent embedded product design. Verticals: Mobility &amp; Logistics + FinTech &amp; InsurTech.
+        <span class="notes-signal">📋 Inovexus notes (Apr 2025): "5 ans chez BackMarket · Insurtech – Il a lancé l'assurance sur Backmarket · Aime bien les Marketplace · Role Actif &amp; board member"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Launched Insurance (BackMarket)</span><span class="skill-tag">Embedded InsurTech</span><span class="skill-tag">Mobility & Logistics</span><span class="skill-tag">Board Member</span></div>
+    </div>
+
+    <!-- 7 -->
+    <div class="mentor-card tier-top">
+      <div class="mentor-header"><div><div class="mentor-name">Cyrille Foillard</div><div class="mentor-location">📍 France</div></div><div class="score-badge score-top">8.7</div></div>
+      <div class="area-tag tag-a3">Area 3 · InsurTech Commercialization</div>
+      <div class="mentor-rationale">Manual industry tags explicitly list <strong>"Finance; Mobility; Insurance; E-commerce; Telecom"</strong> — Insurance as a primary field. Vertical expertise: Mobility &amp; Logistics + FinTech &amp; InsurTech dual vertical. Active business angel in 30+ companies with a focus on scaling and digitalization. Notes confirm he is onboarded as mentor and "convaincu par le modèle." His 25yr career (including audit at a Big 4 / PwC context) makes him ideal for validating Ybil's insurance business case and actuarial model.
+        <span class="notes-signal">📋 Inovexus notes (Jan 2026): "Investisseur multi (fonds &amp; direct) mentor occasionnel · Très capé scaling et digitalisation · Onboardé en tant que mentor"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Insurance (Primary Field)</span><span class="skill-tag">Mobility & Logistics</span><span class="skill-tag">FinTech & InsurTech</span><span class="skill-tag">30+ BA Portfolio</span></div>
+    </div>
+
+    <!-- 8 -->
+    <div class="mentor-card tier-top">
+      <div class="mentor-header"><div><div class="mentor-name">Michel Grunspan</div><div class="mentor-location">📍 Lille, France</div></div><div class="score-badge score-top">8.7</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">TypeForm lists <strong>Logistics; Supply Chain; Import-Export</strong> as primary industries. Built and sold an IT/security distribution company from €6–7M to €50M revenue to a Belgian group (2021), retaining 10% of the acquirer. Notes confirm he is onboarded as Lead Mentor. Lille location = direct Benelux corridor access. His background in building distribution networks for tech products maps directly to Ybil's channel partner strategy with fleet-management integrators.
+        <span class="notes-signal">📋 Inovexus notes (Nov 2025): "A repris une boite early 2000s (6-7M€ CA) et l'a montée jusqu'à 50M€. Revendu en 2021 à un groupe Belge · Onboardé en tant que mentor et Lead Mentor"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Logistics TypeForm Primary</span><span class="skill-tag">Distribution Network Builder</span><span class="skill-tag">Benelux Native</span><span class="skill-tag">Lead Mentor Onboarded</span></div>
+    </div>
+
+    <!-- 9 -->
+    <div class="mentor-card tier-top">
+      <div class="mentor-header"><div><div class="mentor-name">Arvind Behura</div><div class="mentor-location">📍 Paris, France</div></div><div class="score-badge score-top">8.6</div></div>
+      <div class="area-tag tag-a2">Area 2 · Direct B2B Sales</div>
+      <div class="mentor-rationale">MSc in Supply Chain Management from ESSEC + <strong>former Head of Auto1 France &amp; Benelux</strong> (European automotive marketplace, IPO €10bn). Notes confirm 15+ years in the venture ecosystem and active mentoring on Mable (B2B SaaS). Auto1 operates at the intersection of logistics, fleet management, and B2B marketplace — directly adjacent to Ybil's fleet-management integrator ecosystem. His Benelux leadership experience is particularly valuable for Ybil's 2027 Benelux push.
+        <span class="notes-signal">📋 Inovexus notes (Jun 2025): "MSc in Supply Chain Management ESSEC · Former Head of Auto1 France &amp; Benelux (€10bn IPO) · Co-founded two startups · 15+ years in venture ecosystem · Active mentor (Mable)"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Supply Chain MSc</span><span class="skill-tag">Auto1 Head France/Benelux</span><span class="skill-tag">Fleet Adjacent</span><span class="skill-tag">Active Mentor</span></div>
+    </div>
+
+    <!-- 10 -->
+    <div class="mentor-card tier-top">
+      <div class="mentor-header"><div><div class="mentor-name">Joris Jeelof</div><div class="mentor-location">📍 Netherlands</div></div><div class="score-badge score-top">8.5</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">TypeForm lists <strong>"Logistics; MobilityTech; Supply Chain"</strong> as primary industries. Serial entrepreneur with partial exit in logistics-adjacent tech. Netherlands base gives direct access to the Dutch logistics and transport ecosystem — critical for Ybil's Benelux push. Notes confirm InsurTech and FinTech within his investment portfolio. MobilityTech vertical signals deep understanding of connected freight infrastructure aligning with Ybil's eFTI platform.
+        <span class="notes-signal">📋 Inovexus notes (May 2025): "Serial Entrepreneur · Did a part-Exit · AI, Data Sciences, DeFi, MedTech, InsurTech, FinTech, Blockchain &amp; Crypto · Part of other Venture studios"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Logistics TypeForm Primary</span><span class="skill-tag">MobilityTech</span><span class="skill-tag">Netherlands Native</span><span class="skill-tag">Enterprise B2B</span></div>
+    </div>
+
+    <!-- 11 -->
+    <div class="mentor-card tier-top">
+      <div class="mentor-header"><div><div class="mentor-name">Thomas Kieffer</div><div class="mentor-location">📍 Marseille, France</div></div><div class="score-badge score-top">8.5</div></div>
+      <div class="area-tag tag-a3">Area 3 · InsurTech Commercialization</div>
+      <div class="mentor-rationale">Manual industry tags confirm <strong>"Insurance"</strong> as a primary field. Built the EDGE Group (yacht management, marine insurance compliance) from a single LBO to 4 operational entities in France + Mauritius + Dubai in 4 years with quadrupled volumes. Notes show deep familiarity with insurance-adjacent regulatory compliance and risk management in maritime transport. TypeForm vertical: FinTech &amp; InsurTech. His practical experience with per-unit insurance pricing in transport contexts maps to Ybil's per-shipment model.
+        <span class="notes-signal">📋 Inovexus notes (May 2025): "Créer le groupe EDGE il y a 5 ans (parti d'un LBO) : Gestion de Yacht (Maintenance / normes) · En 4 ans : Quadruplé les volumes · BM : Management fees (Récurent mensuel) · International GTM"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Insurance (Primary Field)</span><span class="skill-tag">FinTech & InsurTech</span><span class="skill-tag">Transport Insurance Compliance</span><span class="skill-tag">International GTM</span></div>
+    </div>
+
+    <!-- 12 -->
+    <div class="mentor-card tier-top">
+      <div class="mentor-header"><div><div class="mentor-name">Rodica Farcas</div><div class="mentor-location">📍 Romania</div></div><div class="score-badge score-top">8.5</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">TypeForm lists Logistics, Supply Chain, and Import-Export as primary industries. Notes confirm 14 years at executive level in a European leadership team for an Austin-headquartered industrial software company (Emerson), including prospecting European ecosystem for acquisitions. Deep experience in transitions through growth phases and sales infrastructure development. Romania-based geography covers Eastern Europe — a key corridor for Ybil's Baltic → Poland → Romania expansion.
+        <span class="notes-signal">📋 Inovexus notes (Feb 2026): "14 years at executive level in European leadership team · Corporate acquisitions and M&A · Operation &amp; Sales infrastructure development · Saw acquisitions/Mergers → Integration"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Logistics TypeForm Primary</span><span class="skill-tag">Industrial Software (Emerson)</span><span class="skill-tag">Eastern Europe</span><span class="skill-tag">M&A / Sales Infrastructure</span></div>
+    </div>
+
+    <!-- 13 -->
+    <div class="mentor-card tier-top">
+      <div class="mentor-header"><div><div class="mentor-name">Douglas Wong</div><div class="mentor-location">📍 Munich, Germany</div></div><div class="score-badge score-top">8.5</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">TypeForm confirms Supply Chain, Logistics, and Import-Export as primary industries with GTM Europe mentoring skills. Munich base is strategic: Germany is the largest road-freight market in the EU, and Munich is the gateway to the Austrian and Swiss DACH corridor. Notes confirm active dialogue with Philippe about GP opportunity and ongoing logistics network. Direct access to German logistics operator ecosystem that Ybil needs for its first DACH channel partner.
+        <span class="notes-signal">📋 Inovexus notes (Sep 2025): "Follow up on Douglas Wong's previous conversation with Philip from October regarding the opportunity of becoming a General Partner — manages relationships with current and potential GPs"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Logistics TypeForm Primary</span><span class="skill-tag">Supply Chain</span><span class="skill-tag">DACH Native (Munich)</span><span class="skill-tag">GTM Europe</span></div>
+    </div>
+
+    <!-- 14 -->
+    <div class="mentor-card tier-top">
+      <div class="mentor-header"><div><div class="mentor-name">Martin Foerster</div><div class="mentor-location">📍 Berlin, Germany</div></div><div class="score-badge score-top">8.5</div></div>
+      <div class="area-tag tag-a3">Area 3 · InsurTech Commercialization</div>
+      <div class="mentor-rationale">TypeForm vertical covers FinTech &amp; InsurTech and Regulatory &amp; Compliance — the rare dual combination for Ybil's insurance regulatory navigation. Notes confirm: <strong>Head of AI &amp; Data at Porsche for 6 years</strong>, founder of 2 companies, currently founder of Harpocrates Solutions. Automotive sector background at Porsche aligns closely with fleet-management technology. Berlin base provides DACH InsurTech ecosystem access critical for navigating EU-level insurance product licensing.
+        <span class="notes-signal">📋 Inovexus notes (Dec 2025): "Founder@Harpocrates Solutions GmbH · Working in the automotive itself · Head of AI &amp; Data at Porsche for 6 years · Founded 2 companies · 2 folded interest: Share knowledge / Mentoring"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">FinTech & InsurTech</span><span class="skill-tag">Regulatory & Compliance</span><span class="skill-tag">Porsche AI/Data (6yr)</span><span class="skill-tag">DACH Founder</span></div>
+    </div>
+
+    <!-- 15 -->
+    <div class="mentor-card tier-top">
+      <div class="mentor-header"><div><div class="mentor-name">Daiva Rakauskaite</div><div class="mentor-location">📍 Lithuania</div></div><div class="score-badge score-top">8.5</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">The only Baltic-ecosystem mentor in this selection — a critical differentiator as Ybil's HQ is Tallinn and its first international push targets the Baltics/Poland corridor. Manages two angel funds (EIF-backed, 50% fund/50% angels, €10.5M), with 50+ investments over 15 years including 25 active portfolio companies. Notes confirm co-investment partnership dialogue with Inovexus. Her Lithuanian-based logistics and FinTech network is irreplaceable for Ybil's regional expansion groundwork.
+        <span class="notes-signal">📋 Inovexus notes (Nov 2024): "Working as an Angel Fund, 2 funds · 10.5 million funds · More than 45M in 15 years → 50 companies with half exits, 25 in portfolio still · 1.5 Million ticket size (Half fund half Angels)"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Baltic Ecosystem (Lithuania)</span><span class="skill-tag">EIF-Backed Fund</span><span class="skill-tag">50+ Investments</span><span class="skill-tag">Series A Advisory</span></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== QUALIFIED MENTORS ===== -->
+<section id="qualified-mentors">
+  <div class="section-header">
+    <div class="section-icon icon-blue">🔵</div>
+    <div><div class="section-title">Qualified Mentors <span style="color:var(--blue)">DMF 7.0–8.4</span></div><div class="section-subtitle">24 mentors · Strong complementary coverage — notes-validated backgrounds where available</div></div>
+  </div>
+  <div class="mentor-grid">
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Vincent Dujardin</div><div class="mentor-location">📍 Waterloo, Belgium</div></div><div class="score-badge score-qualified">8.4</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">TypeForm confirms Logistics, Supply Chain, Import-Export. CTO of Lhoist (global lime/minerals group), built internal startup from €2M→€80M, sold to Open Gate Capital (3.5yr, 4× for PE). Belgium base is direct Benelux access. Notes confirm he is "très supporter du modèle, souhaite mentorer" and is interested in joining as GP. GTM and industrial B2B expertise applicable to Ybil's integrator strategy.
+        <span class="notes-signal">📋 Inovexus notes (Dec 2025): "Très supporter du modèle, souhaite mentorer · Interessé par Rubo · Pense rejoindre Inovexus en tant que GP"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Logistics TypeForm</span><span class="skill-tag">Belgium (Benelux)</span><span class="skill-tag">Industrial B2B</span><span class="skill-tag">Startup Builder</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Mathilde Henry</div><div class="mentor-location">📍 France</div></div><div class="score-badge score-qualified">8.3</div></div>
+      <div class="area-tag tag-a2">Area 2 · Direct B2B Sales</div>
+      <div class="mentor-rationale">Executive Director Strategy &amp; Operations EMEA at Adobe. Notes confirm she built her career at Capgemini and is onboarding as GP. TypeForm confirms Logistics and Supply Chain primary industries. Adobe's GTM operations expertise at EMEA scale maps to Ybil's need to build a repeatable B2B sales process across multiple European markets simultaneously.
+        <span class="notes-signal">📋 Inovexus notes (Jul 2025): "Directrice Executive – Stratégie &amp; Operation EMEA chez Adobe · Certaine à 100% de rentrer en tant que GP · Capacité de mettre un montant conséquent"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Logistics TypeForm</span><span class="skill-tag">Adobe EMEA GTM</span><span class="skill-tag">Capgemini Background</span><span class="skill-tag">Supply Chain</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Laurent Horwitz</div><div class="mentor-location">📍 Portugal / Paris</div></div><div class="score-badge score-qualified">8.2</div></div>
+      <div class="area-tag tag-a3">Area 3 · InsurTech Commercialization</div>
+      <div class="mentor-rationale">Active Lead Mentor in the Inovexus programme (led Wilgot.ai mentoring, extended 2 months). Notes confirm direct involvement in evaluating <strong>Open Disguid</strong> — described as "an insurance operating system for the platform economy, making insurance programmable and embedded into digital platforms." Directly relevant to Ybil's embedded per-shipment insurance layer with Elama/Howden.
+        <span class="notes-signal">📋 Inovexus notes (May 2025): "Open Disguid is building an insurance operating system for the platform economy · API-first, on-demand, real-time insurance solutions · Fractional insurance coverage"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Embedded Insurance OS</span><span class="skill-tag">Active Lead Mentor</span><span class="skill-tag">B2B SaaS Marketplace</span><span class="skill-tag">EU Expansion</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Stefan Meyerolbersleben</div><div class="mentor-location">📍 Germany</div></div><div class="score-badge score-qualified">8.1</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">14 years at Reply (Italian IT group, €2B+ revenue), notes confirm extensive DACH enterprise B2B methodology and partnership structures in technology sector. Vertical: Mobility &amp; Logistics. Enterprise B2B skills aligned to Ybil's integrator partner negotiations in the German market. Explores alternative partnership models rather than traditional mentoring — well-suited for advisory/connector role.
+        <span class="notes-signal">📋 Inovexus notes (Nov 2025): "Stefan shared his extensive fourteen-year experience with Reply, an Italian company… extensive DACH enterprise network"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Mobility & Logistics</span><span class="skill-tag">Enterprise B2B DACH</span><span class="skill-tag">Reply (14yr)</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Bernd Schmidt</div><div class="mentor-location">📍 Meerbusch, Germany</div></div><div class="score-badge score-qualified">8.0</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">35 years at 3M (medical/industrial) and Ericsson (25yr — Vodafone, Deutsche Telekom, West Europe, Sub-Saharan Africa). Built Net-Mobile AG from 0 to €120M (sold to NTT Docomo). Notes confirm deep DACH operator network. Telecom + IoT stack is exactly the integration layer connecting Ybil to fleet-management platforms. Meerbusch (NRW) base gives Rhine-Ruhr logistics corridor access.
+        <span class="notes-signal">📋 Inovexus notes (Mar 2026): "35 Jahre bei 3M und Ericsson · Gründungserfahrung: Net-Mobile AG auf 120M€ gebracht, an Docomo verkauft · Advisory Board Member bei Gimel ID"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Telecom (Ericsson 25yr)</span><span class="skill-tag">IoT</span><span class="skill-tag">NRW Germany</span><span class="skill-tag">Mobility & Logistics</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Gitte Hesselholt</div><div class="mentor-location">📍 Copenhagen, Denmark</div></div><div class="score-badge score-qualified">7.9</div></div>
+      <div class="area-tag tag-a2">Area 2 · Direct B2B Sales</div>
+      <div class="mentor-rationale">McKinsey + Carlsberg (FMCG) + MedTech background, currently CCO at a battery storage startup. Notes confirm CFO mentoring experience and M&amp;A leadership. Commercial excellence and go-to-market strategy are her primary offering areas. Nordic geography aligns with Ybil's potential Scandinavian expansion corridor adjacent to the Baltics. Strong enterprise sales methodology capability.
+        <span class="notes-signal">📋 Inovexus notes (Jan 2026): "McKinsey + Carlsberg · Several years in medical technology · Commercial excellence and go-to-market strategies · M&amp;A and business development · CFO mentoring"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">McKinsey</span><span class="skill-tag">FMCG Commercial Excellence</span><span class="skill-tag">GTM DACH/Nordic</span><span class="skill-tag">Enterprise B2B</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Michel Taride</div><div class="mentor-location">📍 Paris, France</div></div><div class="score-badge score-qualified">7.9</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale"><strong>38 years at Hertz</strong> (became International President, managed 150 countries, 10,000 agencies globally). His mobility/travel B2B2C model is directly analogous to Ybil's fleet operator distribution strategy. Notes confirm expertise in franchise operations (130/150 countries franchised), revenue management, and crisis management through geopolitical events. Extensive EU channel infrastructure experience.
+        <span class="notes-signal">📋 Inovexus notes (Apr 2026): "International President at Hertz (38 years) · Managed 150 countries, 10,000 agencies globally · Led through multiple ownership changes · Revenue management, franchise operations"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Hertz 38yr International</span><span class="skill-tag">MobilityTech</span><span class="skill-tag">150-Country Distribution</span><span class="skill-tag">Franchise Ops</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Gary Brown</div><div class="mentor-location">📍 Gothenburg, Sweden</div></div><div class="score-badge score-qualified">7.8</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">Former CEO of Mont Blanc + 13yr career at Ford Motor Company. Notes confirm he is "really interested in the incentivize scheme offered by Inovexus and act as an antenna in Sweden for startups sourcing." CxO-level mentor focused on automotive and Mobility &amp; Logistics. Gothenburg is Sweden's logistics hub; his Ford network overlaps with Baltic Sea freight operators directly relevant to Ybil's Nordic expansion.
+        <span class="notes-signal">📋 Inovexus notes (Sep 2025): "Business advisor, Coach/mentor, Fractional leader CxO and Angel investor, former CEO of Mont Blanc · Really interested in incentivize scheme and act as antenna in Sweden"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Automotive / Mobility & Logistics</span><span class="skill-tag">CxO Advisory</span><span class="skill-tag">Nordic (Sweden)</span><span class="skill-tag">Active Mentor</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Eric Ibled</div><div class="mentor-location">📍 France</div></div><div class="score-badge score-qualified">7.7</div></div>
+      <div class="area-tag tag-a3">Area 3 · InsurTech Commercialization</div>
+      <div class="mentor-rationale">Manual industry tags explicitly confirm <strong>"Finance; AI; VC; Insurance"</strong>. Professional business angel with ~70 investments (10 exits, 40 active). Notes confirm focus on early-stage FinTech, quantum computing, and cybersecurity. Brings investor-grade validation to Ybil's insurance business case and Elama partnership financial structure. His hands-on sourcing approach and FinTech network adds strategic validation value for Area 3.
+        <span class="notes-signal">📋 Inovexus notes (Jun 2025): "~70 investments since he began, about 10 exits, ~40 active participations · Focus on fintech, data/no-code, cybersecurity, quantum computing · Hands-on investing"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Insurance (Primary Tag)</span><span class="skill-tag">Finance / VC Angel</span><span class="skill-tag">AI / FinTech</span><span class="skill-tag">70 Portfolio Investments</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Guillaume Carnaille</div><div class="mentor-location">📍 Zürich, Switzerland</div></div><div class="score-badge score-qualified">7.7</div></div>
+      <div class="area-tag tag-a2">Area 2 · Direct B2B Sales</div>
+      <div class="mentor-rationale">9 years at ABB, built supply chain models at Unilever Switzerland. Notes confirm: "Création modèle de supply chain · Project management · Net Zero: Metal/Papier." Consultant background in M&amp;A / Due Diligence. Zürich base provides Swiss/DACH corridor access. Supply chain digitalization experience directly applicable to Ybil's TMS-layer GTM in the Swiss and German industrial sector.
+        <span class="notes-signal">📋 Inovexus notes (Jul 2025): "9 chez ABB · Unilever en Suisse – Création modèle de supply chain · Conseille M&amp;A – Due Dil · Aime les entrepreneurs à se développer / Mentoring"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">ABB Supply Chain</span><span class="skill-tag">Mobility & Logistics</span><span class="skill-tag">Switzerland</span><span class="skill-tag">M&A Advisory</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Marc Karako</div><div class="mentor-location">📍 Paris, France</div></div><div class="score-badge score-qualified">7.7</div></div>
+      <div class="area-tag tag-a3">Area 3 · InsurTech Commercialization</div>
+      <div class="mentor-rationale">Directeur financier of a CAC 40 company, 15yr at IBM, Senior Advisor in private equity and professor of finance. Notes confirm: "Gros profil Finance – Sociétés cotées et LBOs · Onboardé mentor et Lead Mentor pour Fintechs · Intéressé par le deal by deal." Dual vertical: FinTech &amp; InsurTech + Mobility &amp; Logistics. Financial structuring skills are directly applicable to structuring Ybil's per-shipment insurance pricing model and evaluating the Elama partnership.
+        <span class="notes-signal">📋 Inovexus notes (Oct 2025): "Gros profil Finance – Sociétés cotées et LBOs · Onboardé mentor et Lead Mentor pour Fintechs · Interessé par le deal by deal"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">FinTech & InsurTech</span><span class="skill-tag">CAC 40 Finance</span><span class="skill-tag">IBM 15yr</span><span class="skill-tag">Lead Mentor Onboarded</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Anna Naydenova</div><div class="mentor-location">📍 Paris, France</div></div><div class="score-badge score-qualified">7.6</div></div>
+      <div class="area-tag tag-a2">Area 2 · Direct B2B Sales</div>
+      <div class="mentor-rationale">TypeForm confirms Supply Chain and Logistics as primary industries with GTM B2B skills. Inovexus notes explicitly flag her as a <strong>"Top mentor"</strong> (staff designation) — a rare internal quality signal. Ex-entrepreneur with a successful exit accompanied to Series A. Worked at eBay and with scale-ups in French retail. Directly relevant to Ybil's SME carrier acquisition playbook.
+        <span class="notes-signal">📋 Inovexus notes (May 2025): "Top mentor · Specialisée en GTM / dev commercial · Ex-Entrepreneur · Exit 3 ans plus tard (Accompagnée en Serie A) · Travaille avec des Scaleups qui veulent se développer en France"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">⭐ Top Mentor (Inovexus Staff)</span><span class="skill-tag">Logistics TypeForm</span><span class="skill-tag">GTM B2B</span><span class="skill-tag">Series A Exit</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Thibault Gossé</div><div class="mentor-location">📍 Paris, France</div></div><div class="score-badge score-qualified">7.5</div></div>
+      <div class="area-tag tag-a3">Area 3 · InsurTech Commercialization</div>
+      <div class="mentor-rationale">Vertical expertise covers both <strong>"FinTech &amp; InsurTech"</strong> and <strong>"Mobility &amp; Logistics"</strong> — the precise dual-sector combination Ybil needs for its embedded insurance product. TypeForm industries include MobilityTech and Telecom, echoing Ybil's infrastructure context. One of the rare profiles combining transport-sector understanding with InsurTech product structuring capability.</div>
+      <div class="tag-row"><span class="skill-tag">FinTech & InsurTech</span><span class="skill-tag">Mobility & Logistics</span><span class="skill-tag">MobilityTech</span><span class="skill-tag">Telecom</span></div>
+    </div>
+
+<div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Joanna Pawluczuk</div><div class="mentor-location">📍 Singapore</div></div><div class="score-badge score-qualified">7.5</div></div>
+      <div class="area-tag tag-a2">Area 2 · Direct B2B Sales</div>
+      <div class="mentor-rationale">Mentor notes explicitly confirm <strong>"MaritimeTech, Logistics"</strong> sector expertise with German accelerator experience. Despite Singapore base, logistics operator knowledge and past EU accelerator involvement make her a credible remote advisor for Ybil's GTM methodology and the Polish corridor expansion. Maritime logistics context is directly relevant to Baltic Sea freight.</div>
+      <div class="tag-row"><span class="skill-tag">MaritimeTech</span><span class="skill-tag">Logistics</span><span class="skill-tag">German Accelerator</span><span class="skill-tag">Baltic Sea Adjacent</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Nicolas Lehmann</div><div class="mentor-location">📍 Zürich, Switzerland</div></div><div class="score-badge score-qualified">7.4</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">Vertical: Mobility &amp; Logistics with DeepTech overlay. Zürich base provides Swiss/DACH corridor access. Strategic advisory background suited for structuring high-value channel partner agreements and navigating complex B2B technology integrations with fleet-management platforms. Complementary to Carnaille for the Swiss/DACH channel approach.</div>
+      <div class="tag-row"><span class="skill-tag">Mobility & Logistics</span><span class="skill-tag">DeepTech</span><span class="skill-tag">Strategic Advisory</span><span class="skill-tag">Switzerland</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Thomas Vollmer</div><div class="mentor-location">📍 France</div></div><div class="score-badge score-qualified">7.4</div></div>
+      <div class="area-tag tag-a2">Area 2 · Direct B2B Sales</div>
+      <div class="mentor-rationale">Commercial executive roles at Capgemini, Google, Salesforce, Microsoft, and boost.ai. Notes confirm: "Go-to-market strategy and execution · Proven track record with best-in-class companies · Commercial structure and client engagement frameworks." RegTech advisory (Muinmos) adds regulatory compliance dimension. Interested in mentoring around GTM, Sales, Revenue Growth.
+        <span class="notes-signal">📋 Inovexus notes (Jan 2026): "Commercial executives roles at Capgemini, Google, Salesforce, Microsoft, boost.ai · Interested to explore the model as a mentor around GTM, Sales, Revenue Growth"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Capgemini / Salesforce / Google</span><span class="skill-tag">GTM SaaS</span><span class="skill-tag">Revenue Growth</span><span class="skill-tag">RegTech Advisory</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Jan Poulsen</div><div class="mentor-location">📍 The Hague, Netherlands</div></div><div class="score-badge score-qualified">7.3</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">Vertical: Mobility &amp; Logistics. Netherlands base gives additional Benelux access complementing Joris Jeelof. The Hague is the seat of EU regulatory bodies and international trade courts — context directly relevant to Ybil's eFTI mandate compliance positioning and regulatory channel partner conversations.</div>
+      <div class="tag-row"><span class="skill-tag">Mobility & Logistics</span><span class="skill-tag">Netherlands</span><span class="skill-tag">EU Regulatory Context</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Eduard Kraemer</div><div class="mentor-location">📍 Munich, Germany</div></div><div class="score-badge score-qualified">7.3</div></div>
+      <div class="area-tag tag-a2">Area 2 · Direct B2B Sales</div>
+      <div class="mentor-rationale">Vertical: Mobility &amp; Logistics with SalesTech expertise. Munich base aligns directly with Ybil's planned DACH sales hire. Experienced in structuring B2B sales teams for mobility and logistics tech companies in Germany. Complementary to Douglas Wong for the full Munich/Bavaria DACH penetration.</div>
+      <div class="tag-row"><span class="skill-tag">Mobility & Logistics</span><span class="skill-tag">SalesTech</span><span class="skill-tag">DACH Sales GTM</span><span class="skill-tag">Munich</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Roel Naessens</div><div class="mentor-location">📍 Ghent, Belgium</div></div><div class="score-badge score-qualified">7.2</div></div>
+      <div class="area-tag tag-a2">Area 2 · Direct B2B Sales</div>
+      <div class="mentor-rationale">Ex-Google (10yr) and Salesforce (8yr). Currently leading Inrupt European expansion (Tim Berners-Lee's decentralised web company) — B2B enterprise partnerships with major banks. Notes confirm deep GTM and enterprise partnership experience. TypeForm tags InsurTech and FinTech, though primary profile is enterprise GTM. Ghent base provides Belgium/Benelux corridor access. Repositioned from Area 3 to Area 2 after notes review.
+        <span class="notes-signal">📋 Inovexus notes (Dec 2025): "Ex-Google (10yr) and Salesforce (8yr) · Business Director – Europe at Inrupt · Leading Go-to-Market and business partnerships in Europe with big banks (Chase)"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Google 10yr / Salesforce 8yr</span><span class="skill-tag">Enterprise GTM</span><span class="skill-tag">Ghent Belgium</span><span class="skill-tag">B2B Partnerships</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">F.-X. Schaeken Willemaers</div><div class="mentor-location">📍 Paris, France</div></div><div class="score-badge score-qualified">7.2</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">Enterprise B2B skills with geographic expertise spanning DACH, Eastern EU, and Nordic markets — covering Ybil's full 3-year expansion corridor in one profile. Well-suited for multi-market channel partner strategy and executive-level introductions in complex, multi-country B2B technology deployments.</div>
+      <div class="tag-row"><span class="skill-tag">Enterprise B2B</span><span class="skill-tag">DACH</span><span class="skill-tag">Eastern EU</span><span class="skill-tag">Nordic</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Jérôme Feuvrier</div><div class="mentor-location">📍 France</div></div><div class="score-badge score-qualified">7.1</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">Manual industry tags explicitly confirm <strong>"Manufacturing; Logistics"</strong> with Logistics as a primary sector. Notes confirm: "Ancien General Electrics · Grosse Carrière internationale · Capital pour apporter son savoir faire dans des startups · Investi Avec Aerospace Angels · International GTM Expert." Manufacturing-logistics interface experience maps directly to Ybil's industrial freight carrier customers.
+        <span class="notes-signal">📋 Inovexus notes (Oct 2025): "International GTM Expert · Ancien General Electrics · Grosse Carrière internationale · Capital pour apporter son savoir faire dans des startups"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Logistics (Primary Field)</span><span class="skill-tag">Manufacturing</span><span class="skill-tag">GE International</span><span class="skill-tag">GTM Expert</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Andrea Romano</div><div class="mentor-location">📍 Dubai, UAE</div></div><div class="score-badge score-qualified">7.1</div></div>
+      <div class="area-tag tag-a1">Area 1 · Channel Partnerships</div>
+      <div class="mentor-rationale">TypeForm confirms Supply Chain and Logistics with Mobility &amp; Logistics vertical. Operator-level expertise in international supply chains across multiple geographies. While UAE base is outside Ybil's primary EU corridor, his cross-border logistics operator network and channel structure expertise are transferable for designing Ybil's integrator partnership incentive models.</div>
+      <div class="tag-row"><span class="skill-tag">Supply Chain</span><span class="skill-tag">Logistics</span><span class="skill-tag">Mobility & Logistics</span><span class="skill-tag">International</span></div>
+    </div>
+
+    <div class="mentor-card tier-qualified">
+      <div class="mentor-header"><div><div class="mentor-name">Gaurang Telang</div><div class="mentor-location">📍 Paris, France</div></div><div class="score-badge score-qualified">7.0</div></div>
+      <div class="area-tag tag-a2">Area 2 · Direct B2B Sales</div>
+      <div class="mentor-rationale">Vertical: Mobility &amp; Logistics with LogTech overlay. IoT and Telecom background maps to Ybil's integration stack. Background includes $1.5B ARR portfolio management at Velocity and mobility/wireless/semiconductors experience. Notes show active engagement with Inovexus platform development — brings both operator and investor perspective. Relevant for technical partner conversations with fleet-management platform integrators.
+        <span class="notes-signal">📋 Inovexus notes (Jul 2025): "GT shared his experience managing a $1.5 billion annual recurring revenue portfolio at Velocity · mobility, wireless, semiconductors, avionics"</span>
+      </div>
+      <div class="tag-row"><span class="skill-tag">Mobility & Logistics</span><span class="skill-tag">LogTech</span><span class="skill-tag">IoT / Telecom</span><span class="skill-tag">$1.5B ARR Background</span></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== DASHBOARD ===== -->
+<section id="dashboard">
+  <div class="section-header">
+    <div class="section-icon icon-purple">📊</div>
+    <div><div class="section-title">Match Analytics Dashboard</div><div class="section-subtitle">Visual breakdown of the 39 matched mentors · All chart labels always visible</div></div>
+  </div>
+  <div class="dashboard-grid">
+    <div class="chart-card chart-wide"><div class="chart-title">Score Distribution — All 39 Matched Mentors</div><div class="chart-subtitle">DMF score histogram · Orange = Top tier (≥8.5) · Blue = Qualified (7.0–8.4)</div><canvas id="scoreChart" height="90"></canvas></div>
+    <div class="chart-card"><div class="chart-title">Mentors by Mentoring Area</div><div class="chart-subtitle">Primary area assignment</div><canvas id="areaChart" height="220"></canvas></div>
+    <div class="chart-card"><div class="chart-title">Geographic Distribution</div><div class="chart-subtitle">Mentor base countries</div><canvas id="geoChart" height="220"></canvas></div>
+    <div class="chart-card chart-wide"><div class="chart-title">Top Mentoring Skills Represented</div><div class="chart-subtitle">Skill frequency across all 39 matched profiles</div><canvas id="skillsChart" height="120"></canvas></div>
+    <div class="chart-card"><div class="chart-title">Vertical Expertise Clusters</div><div class="chart-subtitle">Inovexus vertical tags in matched set</div><canvas id="verticalChart" height="220"></canvas></div>
+    <div class="chart-card"><div class="chart-title">Tier Breakdown</div><div class="chart-subtitle">Top vs Qualified</div><canvas id="tierChart" height="220"></canvas></div>
+    <div class="chart-card chart-full"><div class="chart-title">Global Confidence Score — Inovexus Portfolio Benchmark</div><div class="chart-subtitle">Ybil (7.7) ranked against 12 other Inovexus startups · Orange = Ybil · Blue = Portfolio peers</div><canvas id="benchmarkChart" height="90"></canvas></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">INOVEXUS</div>
+  <div class="footer-text">Mentor Matching Report · Ybil · May 2026</div>
+  <div class="footer-text">505 mentors evaluated · 39 matched · Global Confidence Score: 7.7 / 10</div>
+  <div class="footer-text" style="margin-top:8px;opacity:.4;font-size:11px;">Proprietary and confidential · Inovexus Venture Mentor Programme · DMF methodology · Full notes analysis of 206K-line Affinity notes export + Granola meeting records</div>
+</footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+  const CO = '#E8732A', CB = '#3B82F6', CG = '#22C55E', CP = '#A855F7',
+        CT = '#14B8A6', CY = '#EAB308', CR = '#EF4444', CI = '#6366F1',
+        CC = '#06B6D4', GRID = 'rgba(255,255,255,0.07)', MUT = 'rgba(232,234,240,0.55)';
+  Chart.defaults.color = MUT;
+  Chart.defaults.font.family = "'Inter','Segoe UI',sans-serif";
+  Chart.defaults.font.size = 12;
+
+  // ─── 1. Score Distribution ────────────────────────────────────
+  new Chart(document.getElementById('scoreChart'), {
+    type: 'bar',
+    data: {
+      labels: ['9.0–9.3','8.7–8.9','8.5–8.6','8.2–8.4','7.9–8.1','7.6–7.8','7.3–7.5','7.0–7.2'],
+      datasets: [{
+        label: 'Mentors',
+        data: [4, 2, 5, 3, 4, 6, 8, 7],
+        backgroundColor: [CO,CO,'rgba(232,115,42,.7)','rgba(59,130,246,.9)',CB,'rgba(59,130,246,.7)','rgba(59,130,246,.55)','rgba(59,130,246,.4)'],
+        borderColor:'transparent', borderRadius:6
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      plugins:{
+        legend:{display:false},
+        datalabels:{display:false}
+      },
+      scales:{
+        x:{ grid:{color:GRID}, ticks:{color:MUT} },
+        y:{ grid:{color:GRID}, ticks:{color:MUT,stepSize:1}, beginAtZero:true }
+      }
+    }
+  });
+
+  // ─── 2. Area Doughnut ──────────────────────────────────────────
+  new Chart(document.getElementById('areaChart'), {
+    type: 'doughnut',
+    data:{
+      labels:['Area 1 · Channel','Area 2 · B2B Sales','Area 3 · InsurTech'],
+      datasets:[{ data:[19,13,7], backgroundColor:[CO,CB,CP], borderColor:'#161B2A', borderWidth:3, hoverOffset:8 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      cutout:'58%',
+      plugins:{
+        legend:{position:'bottom', labels:{color:MUT, padding:10}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed} mentors`}}
+      }
+    },
+    plugins:[{
+      id:'doughnutLabels',
+      afterDraw(chart){
+        const {ctx, data, chartArea:{top,bottom,left,right}} = chart;
+        const cx=(left+right)/2, cy=(top+bottom)/2;
+        const total=data.datasets[0].data.reduce((a,b)=>a+b,0);
+        ctx.save();
+        ctx.textAlign='center';
+        ctx.textBaseline='middle';
+        ctx.fillStyle='rgba(232,234,240,0.9)';
+        ctx.font='bold 22px Inter';
+        ctx.fillText(total, cx, cy-8);
+        ctx.font='11px Inter';
+        ctx.fillStyle=MUT;
+        ctx.fillText('mentors', cx, cy+12);
+        ctx.restore();
+      }
+    }]
+  });
+
+  // ─── 3. Geographic Doughnut ────────────────────────────────────
+  new Chart(document.getElementById('geoChart'), {
+    type:'doughnut',
+    data:{
+      labels:['France','Germany','Belgium','Netherlands','Italy','Switzerland','Other EU','Non-EU'],
+      datasets:[{data:[10,5,3,3,3,2,8,5], backgroundColor:[CO,CB,CG,CP,CT,CY,CI,CR], borderColor:'#161B2A', borderWidth:3, hoverOffset:8}]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:true, cutout:'52%',
+      plugins:{legend:{position:'bottom', labels:{color:MUT,padding:8,boxWidth:12}}}
+    }
+  });
+
+  // ─── 4. Top Skills ─────────────────────────────────────────────
+  new Chart(document.getElementById('skillsChart'), {
+    type:'bar',
+    data:{
+      labels:['Logistics / Supply Chain','GTM B2B','Enterprise B2B','Mobility & Logistics','Partnership Dev','FinTech & InsurTech','Regulatory Compliance','DACH Market Access','Benelux Market Access','Financial Structuring'],
+      datasets:[{
+        label:'Mentors',
+        data:[27,21,17,24,15,10,9,8,7,7],
+        backgroundColor:[CO,CO,CB,CT,CB,CP,CG,CI,CI,CY],
+        borderColor:'transparent', borderRadius:5
+      }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:true,
+      plugins:{
+        legend:{display:false},
+        datalabels:{
+          display:true, anchor:'end', align:'end',
+          color:'rgba(232,234,240,0.8)', font:{size:11,weight:'600'},
+          formatter:v=>v
+        }
+      },
+      scales:{
+        x:{grid:{color:GRID},ticks:{color:MUT},beginAtZero:true,max:32},
+        y:{grid:{color:'transparent'},ticks:{color:MUT}}
+      },
+      layout:{padding:{right:30}}
+    }
+  });
+
+  // ─── 5. Verticals ──────────────────────────────────────────────
+  new Chart(document.getElementById('verticalChart'), {
+    type:'bar',
+    data:{
+      labels:['Mobility & Logistics','FinTech & InsurTech','LogTech / IndustryTech','MobilityTech','Regulatory & Compliance','DeepTech','SalesTech'],
+      datasets:[{
+        label:'Mentors',
+        data:[23,9,5,5,4,2,2],
+        backgroundColor:[CO,CP,CT,CB,CG,CI,CC],
+        borderColor:'transparent', borderRadius:5
+      }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:true,
+      plugins:{
+        legend:{display:false},
+        datalabels:{
+          display:true, anchor:'end', align:'end',
+          color:'rgba(232,234,240,0.8)', font:{size:11,weight:'600'},
+          formatter:v=>v
+        }
+      },
+      scales:{
+        x:{grid:{color:GRID},ticks:{color:MUT},beginAtZero:true,max:27},
+        y:{grid:{color:'transparent'},ticks:{color:MUT}}
+      },
+      layout:{padding:{right:30}}
+    }
+  });
+
+  // ─── 6. Tier Pie ───────────────────────────────────────────────
+  new Chart(document.getElementById('tierChart'), {
+    type:'doughnut',
+    data:{
+      labels:['Top Mentors (≥8.5)','Qualified (7.0–8.4)'],
+      datasets:[{data:[15,24], backgroundColor:[CO,CB], borderColor:'#161B2A', borderWidth:3, hoverOffset:8}]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:true, cutout:'58%',
+      plugins:{
+        legend:{position:'bottom', labels:{color:MUT,padding:14}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed}`}}
+      }
+    },
+    plugins:[{
+      id:'tierCenterLabel',
+      afterDraw(chart){
+        const {ctx,chartArea:{top,bottom,left,right}}=chart;
+        const cx=(left+right)/2, cy=(top+bottom)/2;
+        ctx.save();
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillStyle='rgba(232,234,240,0.9)';
+        ctx.font='bold 22px Inter'; ctx.fillText('39',cx,cy-8);
+        ctx.font='11px Inter'; ctx.fillStyle=MUT; ctx.fillText('matched',cx,cy+12);
+        ctx.restore();
+      }
+    }]
+  });
+
+  // ─── 7. Benchmark ─────────────────────────────────────────────
+  const bLabels=['Pilea','Flumes','Lemrock','OnSource','Kinvault','Owuba','Lili For Life','Intelligent Core','Saveria','Ybil','Nerva','Blumana','Glober AI'];
+  const bScores=[9.5,8.8,8.5,8.5,8.5,8.4,8.2,8.2,7.8,7.7,7.6,7.0,6.9];
+  const bColors=bLabels.map(l=>l==='Ybil'?CO:'rgba(59,130,246,0.65)');
+  new Chart(document.getElementById('benchmarkChart'), {
+    type:'bar',
+    data:{
+      labels:bLabels,
+      datasets:[{
+        label:'Score',
+        data:bScores,
+        backgroundColor:bColors,
+        borderColor:bLabels.map(l=>l==='Ybil'?CO:'transparent'),
+        borderWidth:2, borderRadius:6
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      plugins:{
+        legend:{display:false},
+        datalabels:{
+          display:true, anchor:'end', align:'top',
+          color:bLabels.map(l=>l==='Ybil'?CO:'rgba(232,234,240,0.7)'),
+          font:{size:11,weight:'700'},
+          formatter:v=>v.toFixed(1)
+        },
+        tooltip:{callbacks:{label:ctx=>` Score: ${ctx.parsed.y.toFixed(1)} / 10`}}
+      },
+      scales:{
+        x:{grid:{color:GRID},ticks:{color:MUT}},
+        y:{grid:{color:GRID},ticks:{color:MUT},min:5,max:10,
+           title:{display:true,text:'Score / 10',color:MUT}}
+      },
+      layout:{padding:{top:20}}
+    }
+  });
+
+  // ─── Smooth scroll nav ─────────────────────────────────────────
+  document.querySelectorAll('.nav-link').forEach(a=>{
+    a.addEventListener('click',e=>{
+      e.preventDefault();
+      const t=document.querySelector(a.getAttribute('href'));
+      if(t) t.scrollIntoView({behavior:'smooth',block:'start'});
+      document.querySelectorAll('.nav-link').forEach(x=>x.classList.remove('active'));
+      a.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
